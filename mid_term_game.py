@@ -1,6 +1,7 @@
+#-*- coding:utf-8 -*-
+
 # 업그레이드 타이핑 게임 제작
 # 사운드 적용 및 DB 연동
-'''파일 목록에서 ctrl+c+v하면 두번째 파일 생성됨. 2로 바꾸고 거기에 코드 추가'''
 
 import random
 import time
@@ -9,6 +10,8 @@ import sys
 import winsound    #'''파이썬에 내장된 패키지<--소리 재생'''
 import sqlite3
 import datetime    #'''게임 시간 기록에 필요한 패키지'''
+
+encodings = "cp949"
 
 ######### DB생성 & Autocommit
 # 본인 DB 파일 경로
@@ -19,8 +22,7 @@ cursor = conn.cursor()
 
 ######### 테이블 생성(Datatype : TEXT NUMERIC INTEGER REAL BLOB)
 cursor.execute(
-    "CREATE TABLE IF NOT EXISTS records(id INTEGER PRIMARY KEY AUTOINCREMENT,\
-cor_cnt INTEGER, record text, regdate text)"
+    "CREATE TABLE IF NOT EXISTS records(id INTEGER PRIMARY KEY AUTOINCREMENT,cor_cnt INTEGER, record text, regdate text)"
 )
 
 '''AUTOINCREMENT : 삽입할 때 insert해주지 않아도, 저절로 1씩 증가 또는 지정한 수로 증가\
@@ -39,43 +41,56 @@ class GameStart:
         print("User : {}님이 입장하였습니다.".format(self.user))
         print()
 #####################################################################3
+def random_list():
+    list = []
+    while True:
+        k = random.randint(0,9)
+        if k not in list:
+            list.append(k)
+        if len(list) == 6:
+            break
+    return list
 
-words = []                                   # 영어 단어 리스트(1000개 로드)
+words = []                                   # 영어 단어 리스트 생성
 
 n = 1                                        # 게임 시도 횟수
 cor_cnt = 0                                  # 정답 개수
 
 try:
-    word_f=open('./resource/word.txt', 'r') # 문제 txt 파일 로드
+    word_f=open('./resource/word1.txt', 'r') # 문제 txt 파일 로드
 except IOError:
     print("파일이 없습니다!! 게임을 진행할 수 없습니다!!")
-else:
-        for c in word_f:
-            words.append(c.strip())
-        word_f.close()
+for c in word_f:
+     words.append(c.strip())
+word_f.close()
 
-
+data = []
+data_a = []
 if words==[]:                                #파일이 없을때 프로그램 종료
     sys.exit()
 #print(words)                                 # 단어 리스트 확인
+
+for line in words:
+    key_value = line.strip().split(":")
+    data.append(key_value[0])
+    data_a.append(key_value[1])
+
+quiz = data_a
+meaning = data
 
 user_name=input("Ready? Input Your name>> ")             # Enter Game Start! 
 user=GameStart(user_name)                     #### GameStart의 user객체 생성
 user.user_info()                              #### user 입장 알림 메서드 호출
 
 start = time.time()                          # Start Time
+k = random_list()
+while n <=5:
 
-while n <= 5:                                # 5회 반복
-    random.shuffle(words)                    # List shuffle!
-    q = random.choice(words)                 # List -> words random extract!
 
-    print("{}번 문제>>".format(n),q)         # 문제 출력
-    
-    x = input("타이핑 하세요>> ")            # 타이핑 입력
-
-    if str(q).strip() == str(x).strip():     # 입력 확인(공백제거)
+    answer = input(f"{meaning[k[n]]} : ")
+    if quiz[k[n]] == answer:     # 입력 확인(공백제거)
         ########### 정답 소리 재생
-        winsound.PlaySound(                  
+        winsound.PlaySound(
             './sound/good.wav',
             winsound.SND_FILENAME   #'''winsound의 PlaySound라는 클래스로 지정'''
             #'''SND_FILENAME을 직접 넣었음'''
@@ -86,7 +101,7 @@ while n <= 5:                                # 5회 반복
 
     else:
         ########### 오답 소리 재생
-        winsound.PlaySound(                  
+        winsound.PlaySound(
             './sound/bad.wav',
             winsound.SND_FILENAME
         )
@@ -94,7 +109,7 @@ while n <= 5:                                # 5회 반복
 
         print(">>Wrong!\n")
 
-    n += 1                                   # 다음 문제 전환
+    n = n + 1                                   # 다음 문제 전환
 
 end = time.time()                            # End Time
 et = end - start                             # 총 게임 시간

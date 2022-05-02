@@ -1,0 +1,10 @@
+sex:성
+policy:정책
+government:정부
+vitamin:비타민
+mirror:거울
+machine:기계
+monitor:모니터
+dictionary:사전
+lucid:명쾌한
+cross:십자가
